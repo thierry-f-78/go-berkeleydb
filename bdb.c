@@ -99,6 +99,7 @@ char *bdb_get(struct bdb *bdb, const char *key)
 		if (bdb->db != NULL) {
 			bdb->db->close(bdb->db, 0);
 			bdb->db = NULL;
+			bdb->mtime = -1;
 		}
 		bdb->status = BDB_NOT_EXISTS;
 		return NULL;
@@ -117,6 +118,15 @@ char *bdb_get(struct bdb *bdb, const char *key)
 			return NULL;
 		}
 
+		/* check stat */
+		if (fstat(fd, &file_open) < 0) {
+			bdb->db->close(bdb->db, 0);
+			bdb->db = NULL;
+			bdb->status = BDB_ERROR;
+			return NULL;
+		}
+		bdb->mtime = file_open.st_mtime;
+
 	} else {
 
 		/* Get dict FD */
@@ -125,15 +135,8 @@ char *bdb_get(struct bdb *bdb, const char *key)
 			return NULL;
 		}
 
-		/* check stat */
-		if (fstat(fd, &file_open) < 0) {
-			bdb->db->close(bdb->db, 0);
-			bdb->db = NULL;
-			bdb->status = BDB_ERROR;
-			return NULL;
-		}
 		/* Reopen */
-		if (file_open.st_mtime != file_name.st_mtime) {
+		if (bdb->mtime != file_name.st_mtime) {
 			if (_bdb_reopen(bdb) == 0) {
 				return NULL;
 			}

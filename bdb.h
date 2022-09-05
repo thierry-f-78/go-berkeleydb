@@ -16,6 +16,7 @@ struct bdb {
 	char *file;
 	int has_zero; /* 0: I don't known, 1: yes, 2: no */
 	enum bdb_type status; /* 0: ok, 1: file not exists, 2: right error, 3: open error, 4: not opend */
+	time_t mtime;
 };
 
 typedef struct bdb bdb;
