@@ -43,7 +43,9 @@ static int _bdb_reopen(struct bdb *bdb)
 			bdb->status = BDB_NOT_EXISTS;
 			break;
 		case DB_OLD_VERSION:
+#ifdef DB_CHKSUM_FAIL
 		case DB_CHKSUM_FAIL:
+#endif
 			bdb->status = BDB_FORMAT;
 			break;
 		default:
