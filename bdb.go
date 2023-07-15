@@ -7,13 +7,14 @@ import "C"
 import "unsafe"
 import "sync"
 
+// operation status
 type Status int
 const (
-	BDB_OK Status = C.BDB_OK                 /* Its alright */
-	BDB_NOT_EXISTS Status = C.BDB_NOT_EXISTS /* DB does not exists or do not have access */
-	BDB_TEMP_ERROR Status = C.BDB_TEMP_ERROR /* Temporary error */
-	BDB_ERROR Status = C.BDB_ERROR           /* Unrecoverable error */
-	BDB_FORMAT Status = C.BDB_FORMAT         /* Do not reconize the database format */
+	BDB_OK Status = C.BDB_OK                 // Its alright
+	BDB_NOT_EXISTS Status = C.BDB_NOT_EXISTS // DB does not exists or do not have access
+	BDB_TEMP_ERROR Status = C.BDB_TEMP_ERROR // Temporary error
+	BDB_ERROR Status = C.BDB_ERROR           // Unrecoverable error
+	BDB_FORMAT Status = C.BDB_FORMAT         // Do not reconize the database format
 )
 
 type BDB struct {
@@ -21,6 +22,7 @@ type BDB struct {
 	mux sync.Mutex
 }
 
+// Open DB file. Return nil if an error occurs
 func Open(file string)(*BDB) {
 	var bdb *BDB
 	var cfile *C.char
@@ -35,6 +37,7 @@ func Open(file string)(*BDB) {
 	return bdb
 }
 
+// Get key in the DB, return BDB_OK on suces, otherwise check Status documentation
 func (bdb *BDB)Get(key string)(string, Status) {
 	var ckey *C.char
 	var cvalue *C.char
@@ -55,7 +58,8 @@ func (bdb *BDB)Get(key string)(string, Status) {
 	return value, status
 }
 
-func (bdb *BDB)CLose()() {
+// Close DB handle
+func (bdb *BDB)Close()() {
 	C.bdb_close(bdb.bdb)
 	bdb.bdb = nil
 }
